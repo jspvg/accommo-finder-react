@@ -1,4 +1,5 @@
 import AccommoCard from "../components/AccommoCard";
+import Filters from "../components/Filters";
 
 const testData = [
   {
@@ -105,17 +106,20 @@ const testData = [
 
 const Accommodations = () => {
   return (
-    <div className="accommodations">
-      {testData.map((accommo) => (
-        <AccommoCard
-          key={accommo.id}
-          title={accommo.title}
-          image={accommo.image}
-          capacity={accommo.capacity}
-          beachDistanceInMeters={accommo.beachDistanceInMeters}
-        />
-      ))}
-    </div>
+    <>
+      <Filters />
+      <div className="accommodations">
+        {testData.map((accommo) => (
+          <AccommoCard
+            key={accommo.id}
+            title={accommo.title}
+            image={accommo.image}
+            capacity={accommo.capacity}
+            beachDistanceInMeters={accommo.beachDistanceInMeters}
+          />
+        ))}
+      </div>
+    </>
   );
 };
 
