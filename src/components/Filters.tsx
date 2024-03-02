@@ -15,6 +15,7 @@ const Filters = () => {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [numPeople, setNumPeople] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -122,12 +123,11 @@ const Filters = () => {
             type="number"
             min="1"
             placeholder="npr. 3"
-            value={numPeople}
             onChange={handlePeopleChange}
           />
         </figure>
         <div className="amenities" ref={dropdownRef}>
-          <button onClick={toggleDropdown}>Amenities {"\u2193"}</button>
+          <button onClick={toggleDropdown} className="simple-btn">Amenities {"\u2193"}</button>
           {isOpen && (
             <div className="amenities-dropdown">
               {amenitiesList.map((amenity) => (
