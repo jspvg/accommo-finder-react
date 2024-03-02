@@ -1,7 +1,8 @@
 import "./App.css";
+import Accommodations from "./pages/Accomodations";
 
 function App() {
-  return <></>;
+  return <Accommodations />;
 }
 
 export default App;
