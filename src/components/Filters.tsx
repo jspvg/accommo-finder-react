@@ -2,7 +2,7 @@ import { ChangeEvent, useEffect, useRef, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { AccState, Accommodations, Action } from "../utils/types";
-import { handleFilter } from "../utils/functions";
+import { amenityDisplayNames, handleFilter } from "../utils/functions";
 
 interface FiltersProps {
   state: AccState;
@@ -21,6 +21,7 @@ const amenitiesList = [
 
 const Filters = ({ state, dispatch, accommodations }: FiltersProps) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [localDates, setLocalDates] = useState(state.selectedDates);
   const [isOpen, setIsOpen] = useState(false);
   const [areFiltersShown, setAreFiltersShown] = useState(false);
   const [isScreenSmall, setIsScreenSmall] = useState(false);
@@ -93,42 +94,36 @@ const Filters = ({ state, dispatch, accommodations }: FiltersProps) => {
       >
         <div className="date-picker">
           <div className="date-align">
-            <p>From: </p>
+            <p>Od: </p>
             <DatePicker
-              selected={state.selectedDates.startDate}
+              selected={localDates.startDate}
               onChange={(date: Date) =>
-                dispatch({
-                  type: "SET_DATES",
-                  payload: {
-                    startDate: date,
-                    endDate: state.selectedDates.endDate,
-                  },
+                setLocalDates({
+                  startDate: date,
+                  endDate: localDates.endDate,
                 })
               }
               selectsStart
-              startDate={state.selectedDates.startDate}
-              endDate={state.selectedDates.endDate}
+              startDate={localDates.startDate}
+              endDate={localDates.endDate}
               minDate={new Date("2024-01-01")}
               maxDate={new Date("2024-12-31")}
             />
           </div>
           <div className="date-align">
-            <p>To: </p>
+            <p>Do: </p>
             <DatePicker
-              selected={state.selectedDates.endDate}
+              selected={localDates.endDate}
               onChange={(date: Date) =>
-                dispatch({
-                  type: "SET_DATES",
-                  payload: {
-                    startDate: state.selectedDates.startDate,
-                    endDate: date,
-                  },
+                setLocalDates({
+                  startDate: localDates.startDate,
+                  endDate: date,
                 })
               }
               selectsEnd
-              startDate={state.selectedDates.startDate}
-              endDate={state.selectedDates.endDate}
-              minDate={state.selectedDates.startDate}
+              startDate={localDates.startDate}
+              endDate={localDates.endDate}
+              minDate={localDates.startDate}
               maxDate={new Date("20214-12-31")}
             />
           </div>
@@ -145,7 +140,7 @@ const Filters = ({ state, dispatch, accommodations }: FiltersProps) => {
         </figure>
         <div className="amenities" ref={dropdownRef}>
           <button onClick={toggleDropdown} className="simple-btn">
-            Amenities {"\u2193"}
+            Pogodnosti {"\u2193"}
           </button>
           {isOpen && (
             <div className="amenities-dropdown">
@@ -158,17 +153,22 @@ const Filters = ({ state, dispatch, accommodations }: FiltersProps) => {
                     checked={state.selectedAmenities.includes(amenity)}
                     onChange={handleAmenityChange}
                   />
-                  <label htmlFor={amenity}>{amenity}</label>
+                  <label htmlFor={amenity}>
+                    {amenityDisplayNames[amenity]}
+                  </label>
                 </div>
               ))}
             </div>
           )}
         </div>
         <button
-          onClick={() => handleFilter(state, dispatch, accommodations)}
+          onClick={() => {
+            dispatch({ type: "SET_DATES", payload: localDates });
+            handleFilter(state, dispatch, accommodations);
+          }}
           className="filter-btn"
         >
-          Filter
+          Filriraj
         </button>
       </div>
     </>
