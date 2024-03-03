@@ -47,7 +47,6 @@ const Accommodations = () => {
     fetchData();
   }, []);
 
-  
   if (!state.filteredAccommodations || !accommodations) {
     return <div>Loading accommodations...</div>;
   }
@@ -60,22 +59,26 @@ const Accommodations = () => {
         accommodations={accommodations}
       />
       <div className="accommodations">
-        {state.filteredAccommodations.map((accommo) => (
-          <AccommoCard
-            key={accommo.id}
-            accommo={accommo}
-            state={state}
-            dispatch={dispatch}
-            setShowReservation={setShowReservation}
-            finalPrice={calculateFinalPrice(
-              accommo.id,
-              accommodations,
-              state.selectedDates.startDate,
-              state.selectedDates.endDate
-            )}
-            setWantedAccomm={setWantedAccommoId}
-          />
-        ))}
+        {state.filteredAccommodations.length > 0 ? (
+          state.filteredAccommodations.map((accommo) => (
+            <AccommoCard
+              key={accommo.id}
+              accommo={accommo}
+              state={state}
+              dispatch={dispatch}
+              setShowReservation={setShowReservation}
+              finalPrice={calculateFinalPrice(
+                accommo.id,
+                accommodations,
+                state.selectedDates.startDate,
+                state.selectedDates.endDate
+              )}
+              setWantedAccomm={setWantedAccommoId}
+            />
+          ))
+        ) : (
+          <div>No accommodations match this criteria</div>
+        )}
       </div>
       {showReservation && wantedAccommoId !== null && (
         <ReservationInfo
