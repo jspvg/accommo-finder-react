@@ -30,4 +30,19 @@ export type Accommodation = {
   availableDates: AvailableDates[];
 };
 
-export type Accomodations = Accommodation[];
+export type Accommodations = Accommodation[];
+
+export type AccState = {
+  selectedDates: { startDate: Date; endDate: Date };
+  numPeople: number;
+  selectedAmenities: string[];
+  filteredAccommodations: Accommodation[] | null;
+  reservedAccommodation: Accommodation | null;
+};
+
+export type Action =
+  | { type: "SET_DATES"; payload: { startDate: Date; endDate: Date } }
+  | { type: "SET_NUM_PEOPLE"; payload: number }
+  | { type: "SET_AMENITIES"; payload: string[] }
+  | { type: "SET_FILTERED_ACCOMMODATIONS"; payload: Accommodation[] }
+  | { type: "SET_RESERVED_ACCOMMODATION"; payload: Accommodation };

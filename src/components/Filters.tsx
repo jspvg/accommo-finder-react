@@ -1,6 +1,13 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { AccState, Accommodations, Action } from "../utils/types";
+
+interface FiltersProps {
+  state: AccState;
+  dispatch: React.Dispatch<Action>;
+  accommodations: Accommodations;
+}
 
 const amenitiesList = [
   "airConditioning",
@@ -11,12 +18,7 @@ const amenitiesList = [
   "tv",
 ];
 
-const Filters = () => {
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [numPeople, setNumPeople] = useState(0);
+const Filters = ({ state, dispatch, accommodations }: FiltersProps) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [areFiltersShown, setAreFiltersShown] = useState(false);
@@ -48,15 +50,16 @@ const Filters = () => {
 
   const handleAmenityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const amenity = event.target.name;
-    setSelectedAmenities((prevAmenities) =>
-      prevAmenities.includes(amenity)
-        ? prevAmenities.filter((a) => a !== amenity)
-        : [...prevAmenities, amenity]
-    );
+    dispatch({
+      type: "SET_AMENITIES",
+      payload: state.selectedAmenities.includes(amenity)
+        ? state.selectedAmenities.filter((a) => a !== amenity)
+        : [...state.selectedAmenities, amenity],
+    });
   };
 
   const handlePeopleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setNumPeople(parseInt(event.target.value));
+    dispatch({ type: "SET_NUM_PEOPLE", payload: parseInt(event.target.value) });
   };
 
   const handleClickOutside = (event: MouseEvent) => {
@@ -69,9 +72,58 @@ const Filters = () => {
   };
 
   const handleFilter = () => {
-    /*
-    TODO: ADD LOGIC
-    */
+    let filtered: Accommodations = [];
+    // filter if user entered dates
+    if (
+      state.selectedDates.startDate &&
+      state.selectedDates.endDate &&
+      state.selectedDates.startDate !== state.selectedDates.endDate
+    ) {
+      filtered = accommodations.filter((accommo) => {
+        return accommo.availableDates.some((dateRange) => {
+          const availableStartDate = new Date(dateRange.intervalStart);
+          const availableEndDate = new Date(dateRange.intervalEnd);
+          return (
+            state.selectedDates.startDate >= availableStartDate &&
+            state.selectedDates.endDate <= availableEndDate
+          );
+        });
+      });
+    }
+
+    // filter if user entered number of people
+    if (state.numPeople) {
+      if (filtered.length > 0) {
+        filtered = filtered.filter(
+          (accommo) => state.numPeople <= accommo.capacity
+        );
+      } else {
+        filtered = accommodations.filter(
+          (accommo) => state.numPeople <= accommo.capacity
+        );
+      }
+    }
+
+    // filter if user entered wanted amenities
+    if (state.selectedAmenities.length > 0) {
+      if (filtered.length > 0) {
+        filtered = filtered.filter((accommo) => {
+          const hasSelectedAmenities = state.selectedAmenities.every(
+            (amenity) => accommo.amenities[amenity]
+          );
+          return hasSelectedAmenities;
+        });
+      } else {
+        filtered = accommodations.filter((accommo) => {
+          const hasSelectedAmenities = state.selectedAmenities.every(
+            (amenity) => accommo.amenities[amenity]
+          );
+          return hasSelectedAmenities;
+        });
+      }
+    }
+
+    dispatch({ type: "SET_FILTERED_ACCOMMODATIONS", payload: filtered });
   };
 
   const toggleDropdown = () => setIsOpen(!isOpen);
@@ -97,22 +149,41 @@ const Filters = () => {
           <div className="date-align">
             <p>From: </p>
             <DatePicker
-              selected={startDate}
-              onChange={(date: Date) => setStartDate(date)}
+              selected={state.selectedDates.startDate}
+              onChange={(date: Date) =>
+                dispatch({
+                  type: "SET_DATES",
+                  payload: {
+                    startDate: date,
+                    endDate: state.selectedDates.endDate,
+                  },
+                })
+              }
               selectsStart
-              startDate={startDate}
-              endDate={endDate}
+              startDate={state.selectedDates.startDate}
+              endDate={state.selectedDates.endDate}
+              minDate={new Date("2024-01-01")}
+              maxDate={new Date("2024-12-31")}
             />
           </div>
           <div className="date-align">
             <p>To: </p>
             <DatePicker
-              selected={endDate}
-              onChange={(date: Date) => setEndDate(date)}
+              selected={state.selectedDates.endDate}
+              onChange={(date: Date) =>
+                dispatch({
+                  type: "SET_DATES",
+                  payload: {
+                    startDate: state.selectedDates.startDate,
+                    endDate: date,
+                  },
+                })
+              }
               selectsEnd
-              startDate={startDate}
-              endDate={endDate}
-              minDate={startDate}
+              startDate={state.selectedDates.startDate}
+              endDate={state.selectedDates.endDate}
+              minDate={state.selectedDates.startDate}
+              maxDate={new Date("20214-12-31")}
             />
           </div>
         </div>
@@ -127,7 +198,9 @@ const Filters = () => {
           />
         </figure>
         <div className="amenities" ref={dropdownRef}>
-          <button onClick={toggleDropdown} className="simple-btn">Amenities {"\u2193"}</button>
+          <button onClick={toggleDropdown} className="simple-btn">
+            Amenities {"\u2193"}
+          </button>
           {isOpen && (
             <div className="amenities-dropdown">
               {amenitiesList.map((amenity) => (
@@ -136,7 +209,7 @@ const Filters = () => {
                     type="checkbox"
                     id={amenity}
                     name={amenity}
-                    checked={selectedAmenities.includes(amenity)}
+                    checked={state.selectedAmenities.includes(amenity)}
                     onChange={handleAmenityChange}
                   />
                   <label htmlFor={amenity}>{amenity}</label>
