@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AccState, Accommodation, Action } from "../utils/types";
+import { amenityDisplayNames } from "../utils/functions";
 
 interface AccommoCardProps {
   accommo: Accommodation;
@@ -7,7 +8,7 @@ interface AccommoCardProps {
   dispatch: React.Dispatch<Action>;
   setShowReservation: React.Dispatch<React.SetStateAction<boolean>>;
   finalPrice: number;
-  setWantedAccomm:  React.Dispatch<React.SetStateAction<number | null>>;
+  setWantedAccomm: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 const AccommoCard = ({
@@ -16,7 +17,7 @@ const AccommoCard = ({
   dispatch,
   setShowReservation,
   finalPrice,
-  setWantedAccomm
+  setWantedAccomm,
 }: AccommoCardProps) => {
   const [isExtended, setIsExtended] = useState(false);
 
@@ -28,9 +29,12 @@ const AccommoCard = ({
   const maxPrice = Math.max(...prices);
   const priceRange = `${minPrice} - ${maxPrice}`;
   const hasSelectedDates =
-    state.selectedDates.startDate.getTime() !== state.selectedDates.endDate.getTime();
+    state.selectedDates.startDate.getTime() !==
+    state.selectedDates.endDate.getTime();
 
-  const displayedPrice = hasSelectedDates ? `${finalPrice}` : `${priceRange}`;
+  const displayedPrice = hasSelectedDates
+    ? `${finalPrice === 0 ? "Nije dostupno" : finalPrice}`
+    : `${priceRange}`;
 
   const handleSeeMore = () => {
     setIsExtended(!isExtended);
@@ -65,24 +69,26 @@ const AccommoCard = ({
         )}
       </div>
       <button id="see-more" onClick={handleSeeMore} className="simple-btn">
-        {isExtended ? "See less \u2191" : "See more \u2193"}
+        {isExtended ? "Vidi manje \u2191" : "Vidi više \u2193"}
       </button>
       {isExtended && (
         <div className="extended">
           <div className="available-amenities">
             {trueAmenities.map((amenity, index) => (
               <p className="small-card" key={index}>
-                {amenity}
+                {amenityDisplayNames[amenity]}
               </p>
             ))}
           </div>
-          {hasSelectedDates ? (
+          {hasSelectedDates && finalPrice !== 0 ? (
             <button className="filter-btn" onClick={handleReservation}>
-              Reserve
+              Rezerviraj
             </button>
           ) : (
             <p>
-              Please select the wanted dates in the filter to see exact prices
+              {finalPrice === 0 && hasSelectedDates
+                ? "Apartman nije dostupan za željeni termin"
+                : "Molimo odaberite željeni termin boravka u filteru pri vrhu stranice"}
             </p>
           )}
         </div>

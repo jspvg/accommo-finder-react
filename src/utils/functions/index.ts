@@ -1,5 +1,14 @@
 import { AccState, Accommodations, Action } from "../types";
 
+export const amenityDisplayNames: { [key: string]: string } = {
+  airConditioning: "Klima",
+  parkingSpace: "Parking",
+  pets: "Dozvoljeni ljubimci",
+  pool: "Bazen",
+  wifi: "Wi-Fi",
+  tv: "TV",
+};
+
 export const handleFilter = (
   state: AccState,
   dispatch: React.Dispatch<Action>,

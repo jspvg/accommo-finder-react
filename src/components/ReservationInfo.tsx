@@ -16,8 +16,9 @@ const ReservationInfo = ({
       <h2>Uspješno ste rezervirali smještaj {title}</h2>
       <h4>Detalji:</h4>
       <p>
-        Rezervirani termin: <br /> {selectedDates.startDate.toISOString().slice(0, 10)}{" "}
-        - {selectedDates.endDate.toISOString().slice(0, 10)}
+        Rezervirani termin: <br />{" "}
+        {selectedDates.startDate.toISOString().slice(0, 10)} do{" "}
+        {selectedDates.endDate.toISOString().slice(0, 10)}
       </p>
       <p>Broj osoba: {!numPeople ? "nije određeno" : numPeople}</p>
       <p>Ukupna cijena: {finalPrice} €</p>
