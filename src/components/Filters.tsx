@@ -1,42 +1,13 @@
-import { ChangeEvent, useEffect, useReducer, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { Accommodations } from "../utils/types";
+import { AccState, Accommodations, Action } from "../utils/types";
 
 interface FiltersProps {
+  state: AccState;
+  dispatch: React.Dispatch<Action>;
   accommodations: Accommodations;
-  setFilteredAccommodations: React.Dispatch<
-    React.SetStateAction<Accommodations | null>
-  >;
 }
-
-interface FilterState {
-  startDate: Date;
-  endDate: Date;
-  selectedAmenities: string[];
-  numPeople: number;
-}
-
-type FilterAction =
-  | { type: "SET_START_DATE"; payload: Date }
-  | { type: "SET_END_DATE"; payload: Date }
-  | { type: "SET_AMENITIES"; payload: string[] }
-  | { type: "SET_NUM_PEOPLE"; payload: number };
-
-const reducer = (state: FilterState, action: FilterAction): FilterState => {
-  switch (action.type) {
-    case "SET_START_DATE":
-      return { ...state, startDate: action.payload };
-    case "SET_END_DATE":
-      return { ...state, endDate: action.payload };
-    case "SET_AMENITIES":
-      return { ...state, selectedAmenities: action.payload };
-    case "SET_NUM_PEOPLE":
-      return { ...state, numPeople: action.payload };
-    default:
-      return state;
-  }
-};
 
 const amenitiesList = [
   "airConditioning",
@@ -47,16 +18,7 @@ const amenitiesList = [
   "tv",
 ];
 
-const Filters = ({
-  accommodations,
-  setFilteredAccommodations,
-}: FiltersProps) => {
-  const [state, dispatch] = useReducer(reducer, {
-    startDate: new Date(),
-    endDate: new Date(),
-    selectedAmenities: [],
-    numPeople: 0,
-  });
+const Filters = ({ state, dispatch, accommodations }: FiltersProps) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [areFiltersShown, setAreFiltersShown] = useState(false);
@@ -112,14 +74,18 @@ const Filters = ({
   const handleFilter = () => {
     let filtered: Accommodations = [];
     // filter if user entered dates
-    if (state.startDate && state.endDate && state.startDate !== state.endDate) {
+    if (
+      state.selectedDates.startDate &&
+      state.selectedDates.endDate &&
+      state.selectedDates.startDate !== state.selectedDates.endDate
+    ) {
       filtered = accommodations.filter((accommo) => {
         return accommo.availableDates.some((dateRange) => {
           const availableStartDate = new Date(dateRange.intervalStart);
           const availableEndDate = new Date(dateRange.intervalEnd);
           return (
-            state.startDate >= availableStartDate &&
-            state.endDate <= availableEndDate
+            state.selectedDates.startDate >= availableStartDate &&
+            state.selectedDates.endDate <= availableEndDate
           );
         });
       });
@@ -157,7 +123,7 @@ const Filters = ({
       }
     }
 
-    setFilteredAccommodations(filtered);
+    dispatch({ type: "SET_FILTERED_ACCOMMODATIONS", payload: filtered });
   };
 
   const toggleDropdown = () => setIsOpen(!isOpen);
@@ -183,13 +149,19 @@ const Filters = ({
           <div className="date-align">
             <p>From: </p>
             <DatePicker
-              selected={state.startDate}
+              selected={state.selectedDates.startDate}
               onChange={(date: Date) =>
-                dispatch({ type: "SET_START_DATE", payload: date })
+                dispatch({
+                  type: "SET_DATES",
+                  payload: {
+                    startDate: date,
+                    endDate: state.selectedDates.endDate,
+                  },
+                })
               }
               selectsStart
-              startDate={state.startDate}
-              endDate={state.endDate}
+              startDate={state.selectedDates.startDate}
+              endDate={state.selectedDates.endDate}
               minDate={new Date("2024-01-01")}
               maxDate={new Date("2024-12-31")}
             />
@@ -197,14 +169,20 @@ const Filters = ({
           <div className="date-align">
             <p>To: </p>
             <DatePicker
-              selected={state.endDate}
+              selected={state.selectedDates.endDate}
               onChange={(date: Date) =>
-                dispatch({ type: "SET_END_DATE", payload: date })
+                dispatch({
+                  type: "SET_DATES",
+                  payload: {
+                    startDate: state.selectedDates.startDate,
+                    endDate: date,
+                  },
+                })
               }
               selectsEnd
-              startDate={state.startDate}
-              endDate={state.endDate}
-              minDate={state.startDate}
+              startDate={state.selectedDates.startDate}
+              endDate={state.selectedDates.endDate}
+              minDate={state.selectedDates.startDate}
               maxDate={new Date("20214-12-31")}
             />
           </div>

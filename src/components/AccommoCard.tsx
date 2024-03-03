@@ -12,7 +12,7 @@ const AccommoCard = (accommo: Accommodation) => {
   };
 
   const handleReservation = () => {
-    alert("Successfully reserved!")
+    alert("Successfully reserved!");
   };
 
   return (
@@ -33,7 +33,7 @@ const AccommoCard = (accommo: Accommodation) => {
         {isExtended && (
           <figure>
             <img src="/euro.svg" alt="Euro" />
-            <figcaption>{accommo.pricelistInEuros[2].pricePerNight}</figcaption>
+            <figcaption>{accommo.pricelistInEuros[0].pricePerNight}</figcaption>
           </figure>
         )}
       </div>
@@ -49,12 +49,10 @@ const AccommoCard = (accommo: Accommodation) => {
               </p>
             ))}
           </div>
-          <div className="reservation">
-            <p>dates</p>
-            <button className="filter-btn" onClick={handleReservation}>
-              Reserve
-            </button>
-          </div>
+
+          <button className="filter-btn" onClick={handleReservation}>
+            Reserve
+          </button>
         </div>
       )}
     </div>
