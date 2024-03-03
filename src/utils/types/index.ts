@@ -30,4 +30,4 @@ export type Accommodation = {
   availableDates: AvailableDates[];
 };
 
-export type Accomodations = Accommodation[];
+export type Accommodations = Accommodation[];

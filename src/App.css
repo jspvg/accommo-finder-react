@@ -33,6 +33,7 @@ figure {
   border-radius: 10px;
   width: 300px;
   padding: 1%;
+  min-height: 300px;
 
   img {
     max-width: 200px;
