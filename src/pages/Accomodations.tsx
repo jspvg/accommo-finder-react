@@ -12,8 +12,6 @@ const initialState = {
   reservedAccommodation: null,
 };
 
-
-
 const reducer = (state: AccState, action: Action): AccState => {
   switch (action.type) {
     case "SET_DATES":

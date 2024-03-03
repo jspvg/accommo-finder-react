@@ -2,6 +2,7 @@ import { ChangeEvent, useEffect, useRef, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { AccState, Accommodations, Action } from "../utils/types";
+import { handleFilter } from "../utils/functions";
 
 interface FiltersProps {
   state: AccState;
@@ -69,61 +70,6 @@ const Filters = ({ state, dispatch, accommodations }: FiltersProps) => {
     ) {
       setIsOpen(false);
     }
-  };
-
-  const handleFilter = () => {
-    let filtered: Accommodations = [];
-    // filter if user entered dates
-    if (
-      state.selectedDates.startDate &&
-      state.selectedDates.endDate &&
-      state.selectedDates.startDate !== state.selectedDates.endDate
-    ) {
-      filtered = accommodations.filter((accommo) => {
-        return accommo.availableDates.some((dateRange) => {
-          const availableStartDate = new Date(dateRange.intervalStart);
-          const availableEndDate = new Date(dateRange.intervalEnd);
-          return (
-            state.selectedDates.startDate >= availableStartDate &&
-            state.selectedDates.endDate <= availableEndDate
-          );
-        });
-      });
-    }
-
-    // filter if user entered number of people
-    if (state.numPeople) {
-      if (filtered.length > 0) {
-        filtered = filtered.filter(
-          (accommo) => state.numPeople <= accommo.capacity
-        );
-      } else {
-        filtered = accommodations.filter(
-          (accommo) => state.numPeople <= accommo.capacity
-        );
-      }
-    }
-
-    // filter if user entered wanted amenities
-    if (state.selectedAmenities.length > 0) {
-      if (filtered.length > 0) {
-        filtered = filtered.filter((accommo) => {
-          const hasSelectedAmenities = state.selectedAmenities.every(
-            (amenity) => accommo.amenities[amenity]
-          );
-          return hasSelectedAmenities;
-        });
-      } else {
-        filtered = accommodations.filter((accommo) => {
-          const hasSelectedAmenities = state.selectedAmenities.every(
-            (amenity) => accommo.amenities[amenity]
-          );
-          return hasSelectedAmenities;
-        });
-      }
-    }
-
-    dispatch({ type: "SET_FILTERED_ACCOMMODATIONS", payload: filtered });
   };
 
   const toggleDropdown = () => setIsOpen(!isOpen);
@@ -218,7 +164,10 @@ const Filters = ({ state, dispatch, accommodations }: FiltersProps) => {
             </div>
           )}
         </div>
-        <button onClick={handleFilter} className="filter-btn">
+        <button
+          onClick={() => handleFilter(state, dispatch, accommodations)}
+          className="filter-btn"
+        >
           Filter
         </button>
       </div>
