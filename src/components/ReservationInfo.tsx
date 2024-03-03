@@ -1,15 +1,13 @@
 interface ReservationInfoProps {
   title: string;
-  startDate: string;
-  endDate: string;
+  selectedDates: { startDate: Date; endDate: Date };
   numPeople: number;
   finalPrice: number;
 }
 
 const ReservationInfo = ({
   title,
-  startDate,
-  endDate,
+  selectedDates,
   numPeople,
   finalPrice,
 }: ReservationInfoProps) => {
@@ -18,12 +16,15 @@ const ReservationInfo = ({
       <h2>Uspješno ste rezervirali smještaj {title}</h2>
       <h4>Detalji:</h4>
       <p>
-        Rezervirani termin: {startDate} - {endDate}
+        Rezervirani termin: <br /> {selectedDates.startDate.toISOString().slice(0, 10)}{" "}
+        - {selectedDates.endDate.toISOString().slice(0, 10)}
       </p>
-      <p>Broj osoba: {numPeople}</p>
-      <p>Ukupna cijena: {finalPrice}</p>
+      <p>Broj osoba: {!numPeople ? "nije određeno" : numPeople}</p>
+      <p>Ukupna cijena: {finalPrice} €</p>
 
-      <a href="/" className="simple-btn">Natrag na početnu</a>
+      <a href="/" className="simple-btn">
+        Natrag na početnu
+      </a>
     </div>
   );
 };
