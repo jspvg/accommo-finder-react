@@ -10,7 +10,8 @@ export const handleFilter = (
     const isAvailableDates =
       state.selectedDates.startDate &&
       state.selectedDates.endDate &&
-      state.selectedDates.startDate !== state.selectedDates.endDate
+      state.selectedDates.startDate.getTime() !==
+        state.selectedDates.endDate.getTime()
         ? accommo.availableDates.some((dateRange) => {
             const availableStartDate = new Date(dateRange.intervalStart);
             const availableEndDate = new Date(dateRange.intervalEnd);
@@ -38,4 +39,41 @@ export const handleFilter = (
   });
 
   dispatch({ type: "SET_FILTERED_ACCOMMODATIONS", payload: filtered });
+};
+
+export const calculateFinalPrice = (
+  id: number,
+  accommodations: Accommodations,
+  startDate: Date,
+  endDate: Date
+) => {
+  if (!id) return 0;
+
+  const wantedAccommodation = accommodations.find(
+    (accommo) => accommo.id === id
+  );
+
+  if (!wantedAccommodation) {
+    throw new Error("No accommodation found for the given id.");
+  }
+
+  let totalCost = 0;
+  const currentDate = new Date(startDate);
+
+  while (currentDate < endDate) {
+    const pricePerNight = wantedAccommodation.pricelistInEuros.find(
+      (price) =>
+        new Date(price.intervalStart) <= currentDate &&
+        new Date(price.intervalEnd) >= currentDate
+    )?.pricePerNight;
+
+    if (!pricePerNight) {
+      return 0;
+    }
+
+    totalCost += pricePerNight;
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return totalCost;
 };

@@ -1,18 +1,45 @@
 import { useState } from "react";
-import { Accommodation } from "../utils/types";
+import { AccState, Accommodation, Action } from "../utils/types";
 
-const AccommoCard = (accommo: Accommodation) => {
+interface AccommoCardProps {
+  accommo: Accommodation;
+  state: AccState;
+  dispatch: React.Dispatch<Action>;
+  setShowReservation: React.Dispatch<React.SetStateAction<boolean>>;
+  finalPrice: number;
+  setWantedAccomm:  React.Dispatch<React.SetStateAction<number | null>>;
+}
+
+const AccommoCard = ({
+  accommo,
+  state,
+  dispatch,
+  setShowReservation,
+  finalPrice,
+  setWantedAccomm
+}: AccommoCardProps) => {
   const [isExtended, setIsExtended] = useState(false);
 
   const amenityKeys = Object.keys(accommo.amenities);
   const trueAmenities = amenityKeys.filter((key) => accommo.amenities[key]);
+
+  const prices = accommo.pricelistInEuros.map((price) => price.pricePerNight);
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+  const priceRange = `${minPrice} - ${maxPrice}`;
+  const hasSelectedDates =
+    state.selectedDates.startDate.getTime() !== state.selectedDates.endDate.getTime();
+
+  const displayedPrice = hasSelectedDates ? `${finalPrice}` : `${priceRange}`;
 
   const handleSeeMore = () => {
     setIsExtended(!isExtended);
   };
 
   const handleReservation = () => {
-    alert("Successfully reserved!");
+    dispatch({ type: "SET_RESERVED_ACCOMMODATION", payload: accommo });
+    setWantedAccomm(accommo.id);
+    setShowReservation(true);
   };
 
   return (
@@ -33,7 +60,7 @@ const AccommoCard = (accommo: Accommodation) => {
         {isExtended && (
           <figure>
             <img src="/euro.svg" alt="Euro" />
-            <figcaption>{accommo.pricelistInEuros[0].pricePerNight}</figcaption>
+            <figcaption>{displayedPrice}</figcaption>
           </figure>
         )}
       </div>
@@ -49,10 +76,15 @@ const AccommoCard = (accommo: Accommodation) => {
               </p>
             ))}
           </div>
-
-          <button className="filter-btn" onClick={handleReservation}>
-            Reserve
-          </button>
+          {hasSelectedDates ? (
+            <button className="filter-btn" onClick={handleReservation}>
+              Reserve
+            </button>
+          ) : (
+            <p>
+              Please select the wanted dates in the filter to see exact prices
+            </p>
+          )}
         </div>
       )}
     </div>

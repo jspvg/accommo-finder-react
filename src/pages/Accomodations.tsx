@@ -3,6 +3,8 @@ import AccommoCard from "../components/AccommoCard";
 import Filters from "../components/Filters";
 import { Accommodations as AType, AccState, Action } from "../utils/types";
 import { fetchAccommodations } from "../utils/api";
+import ReservationInfo from "../components/ReservationInfo";
+import { calculateFinalPrice } from "../utils/functions";
 
 const initialState = {
   selectedDates: { startDate: new Date(), endDate: new Date() },
@@ -32,6 +34,8 @@ const reducer = (state: AccState, action: Action): AccState => {
 const Accommodations = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [accommodations, setAccommodations] = useState<AType | null>(null);
+  const [showReservation, setShowReservation] = useState(false);
+  const [wantedAccommoId, setWantedAccommoId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,6 +47,7 @@ const Accommodations = () => {
     fetchData();
   }, []);
 
+  
   if (!state.filteredAccommodations || !accommodations) {
     return <div>Loading accommodations...</div>;
   }
@@ -58,17 +63,33 @@ const Accommodations = () => {
         {state.filteredAccommodations.map((accommo) => (
           <AccommoCard
             key={accommo.id}
-            id={accommo.id}
-            title={accommo.title}
-            image={accommo.image}
-            amenities={accommo.amenities}
-            capacity={accommo.capacity}
-            beachDistanceInMeters={accommo.beachDistanceInMeters}
-            pricelistInEuros={accommo.pricelistInEuros}
-            availableDates={accommo.availableDates}
+            accommo={accommo}
+            state={state}
+            dispatch={dispatch}
+            setShowReservation={setShowReservation}
+            finalPrice={calculateFinalPrice(
+              accommo.id,
+              accommodations,
+              state.selectedDates.startDate,
+              state.selectedDates.endDate
+            )}
+            setWantedAccomm={setWantedAccommoId}
           />
         ))}
       </div>
+      {showReservation && wantedAccommoId !== null && (
+        <ReservationInfo
+          title={state.reservedAccommodation?.title as string}
+          selectedDates={state.selectedDates}
+          numPeople={state.numPeople}
+          finalPrice={calculateFinalPrice(
+            wantedAccommoId,
+            accommodations,
+            state.selectedDates.startDate,
+            state.selectedDates.endDate
+          )}
+        />
+      )}
     </>
   );
 };
