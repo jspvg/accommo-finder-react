@@ -48,7 +48,7 @@ const Accommodations = () => {
   }, []);
 
   if (!state.filteredAccommodations || !accommodations) {
-    return <div>Loading accommodations...</div>;
+    return <div>Učitavanje smještanja...</div>;
   }
 
   return (
@@ -77,7 +77,7 @@ const Accommodations = () => {
             />
           ))
         ) : (
-          <div>No accommodations match this criteria</div>
+          <div>Nema smještaja koji odgovara zadanim filterima...</div>
         )}
       </div>
       {showReservation && wantedAccommoId !== null && (
